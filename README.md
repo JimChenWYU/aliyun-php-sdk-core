@@ -16,4 +16,4 @@ $ composer require jimchen/aliyun-php-sdk-core:~1.0
 
 ## License
 
-MIT
+Apache License 2.0
