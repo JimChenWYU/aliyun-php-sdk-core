@@ -1,0 +1,39 @@
+{
+    "name": "jimchen/aliyun-php-sdk-core",
+    "description": "aliyun php sdk core",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "JimChen",
+            "email": "18219111672@163.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3",
+        "ext-openssl": "*",
+        "ext-json": "*",
+        "ext-simplexml": "*",
+        "ext-curl": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "JimChen\\AliyunCore\\": "src/"
+        },
+        "classmap": [
+            "src/Auth/RamRoleArnService.php",
+            "src/Regions/LocationService.php"
+        ],
+        "files": [
+            "src/bootstrap.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "UnitTest\\": "tests/"
+        }
+    }
+}
