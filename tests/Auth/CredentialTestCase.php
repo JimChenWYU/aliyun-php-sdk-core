@@ -21,9 +21,9 @@
 namespace UnitTest\Auth;
 
 use JimChen\AliyunCore\Auth\Credential;
-use UnitTest\BaseTest;
+use UnitTest\BaseTestCase;
 
-class CredentialTest extends BaseTest
+class CredentialTestCase extends BaseTestCase
 {
     public function testCredential()
     {

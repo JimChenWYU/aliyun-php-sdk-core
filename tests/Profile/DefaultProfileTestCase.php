@@ -21,9 +21,9 @@
 namespace UnitTest\Auth;
 
 use JimChen\AliyunCore\Profile\DefaultProfile;
-use UnitTest\BaseTest;
+use UnitTest\BaseTestCase;
 
-class DefaultProfileTest extends BaseTest
+class DefaultProfileTestCase extends BaseTestCase
 {
     public function testGetProfile()
     {

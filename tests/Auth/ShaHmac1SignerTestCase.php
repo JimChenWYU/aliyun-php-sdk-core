@@ -20,9 +20,9 @@
 namespace UnitTest\Auth;
 
 use JimChen\AliyunCore\Auth\ShaHmac1Signer;
-use UnitTest\BaseTest;
+use UnitTest\BaseTestCase;
 
-class ShaHmac1SignerTest extends BaseTest
+class ShaHmac1SignerTestCase extends BaseTestCase
 {
     public function testShaHmac1Signer()
     {

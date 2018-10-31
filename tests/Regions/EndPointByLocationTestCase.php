@@ -8,11 +8,12 @@
 
 namespace UnitTest\Regions;
 
+use JimChen\AliyunCore\Http\HttpResponse;
 use JimChen\AliyunCore\Profile\DefaultProfile;
 use JimChen\AliyunCore\Regions\LocationService;
-use UnitTest\BaseTest;
+use UnitTest\BaseTestCase;
 
-class EndPointByLocationTest extends BaseTest
+class EndPointByLocationTestCase extends BaseTestCase
 {
     /**
      * @var LocationService
@@ -36,6 +37,26 @@ class EndPointByLocationTest extends BaseTest
     public function testFindProductDomain()
     {
         $this->initClient();
+
+        $response = new HttpResponse();
+        $response->setStatus(200);
+        $response->setBody(json_encode(array(
+            'Endpoints' => array(
+                'Endpoint' => array(
+                    array(
+                        'Endpoint' => 'apigateway.cn-shanghai.aliyuncs.com'
+                    )
+                )
+            )
+        )));
+
+        \Mockery::close();
+        $mock = \Mockery::mock('alias:\JimChen\AliyunCore\Http\HttpHelper');
+        $mock->shouldReceive('curl')
+            ->once()
+            ->withAnyArgs()
+            ->andReturn($response);
+
         $domain = $this->locationService->findProductDomain("cn-shanghai", "apigateway", "openAPI", "CloudAPI");
         $this->assertEquals("apigateway.cn-shanghai.aliyuncs.com", $domain);
     }

@@ -14,23 +14,18 @@ use JimChen\AliyunCore\DefaultAcsClient;
 use JimChen\AliyunCore\Profile\DefaultProfile;
 use PHPUnit\Framework\TestCase;
 
-class BaseTest extends TestCase
+class BaseTestCase extends TestCase
 {
     public $client = null;
 
     public function setUp()
     {
-        require __DIR__ . '/Ecs/Request/DescribeRegionsRequest.php';
-        require __DIR__ . '/BatchCompute/ListImagesRequest.php';
-
         $iClientProfile = DefaultProfile::getProfile("cn-hangzhou", "AccessKey", "AccessSecret");
         $this->client = new DefaultAcsClient($iClientProfile);
     }
 
-    public function getProperty($propertyKey)
+    public function getProperty()
     {
-        $accessKey = "";
-        $accessSecret = "";
-        $iClientProfile = DefaultProfile::getProfile("cn-hangzhou", "AccessKey", "AccessSecret");
+        return DefaultProfile::getProfile("cn-hangzhou", "AccessKey", "AccessSecret");
     }
 }

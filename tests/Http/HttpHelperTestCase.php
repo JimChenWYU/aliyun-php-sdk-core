@@ -17,15 +17,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-namespace UnitTest\Regions;
 
-use JimChen\AliyunCore\Regions\EndpointProvider;
-use UnitTest\BaseTest;
+namespace UnitTest\Http;
 
-class EndpointProviderTest extends BaseTest
+use UnitTest\BaseTestCase;
+use JimChen\AliyunCore\Http\HttpHelper;
+
+class HttpHelperTestCase extends BaseTestCase
 {
-    public function testFindProductDomain()
+    public function testCurl()
     {
-        $this->assertEquals("ecs-cn-hangzhou.aliyuncs.com", EndpointProvider::findProductDomain("cn-hangzhou", "Ecs"));
+        $httpResponse = HttpHelper::curl("ecs.aliyuncs.com");
+        $this->assertEquals(400, $httpResponse->getStatus());
+        $this->assertNotNull($httpResponse->getBody());
     }
 }

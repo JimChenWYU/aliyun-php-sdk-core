@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__ . '/mock.php';
 
 use JimChen\AliyunCore\DefaultAcsClient;
 use JimChen\AliyunCore\Profile\DefaultProfile;
