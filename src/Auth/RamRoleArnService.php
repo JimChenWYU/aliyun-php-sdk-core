@@ -19,6 +19,7 @@
  */
 namespace JimChen\AliyunCore\Auth;
 
+use JimChen\AliyunCore\Exception\ClientException;
 use JimChen\AliyunCore\Http\HttpHelper;
 use JimChen\AliyunCore\Profile\IClientProfile;
 use JimChen\AliyunCore\RpcAcsRequest;
@@ -32,6 +33,12 @@ define("ROLE_ARN_EXPIRE_TIME", 3600);
 
 class AssumeRoleRequest extends RpcAcsRequest
 {
+    /**
+     * AssumeRoleRequest constructor.
+     *
+     * @param $roleArn
+     * @param $roleSessionName
+     */
     function __construct($roleArn, $roleSessionName) {
         parent::__construct(STS_PRODUCT_NAME, STS_VERSION, STS_ACTION);
 
@@ -47,19 +54,41 @@ class AssumeRoleRequest extends RpcAcsRequest
 
 class RamRoleArnService
 {
+    /**
+     * @var IClientProfile
+     */
     private $clientProfile;
+    /**
+     * @var null|string
+     */
     private $lastClearTime = null;
+    /**
+     * @var null|string
+     */
     private $sessionCredential = null;
+    /**
+     * @var string
+     */
     public static $serviceDomain = STS_DOMAIN;
 
-    function __construct(IClientProfile $clientProfile) {
+    /**
+     * RamRoleArnService constructor.
+     *
+     * @param $clientProfile
+     */
+    public function __construct($clientProfile)
+    {
         $this->clientProfile = $clientProfile;
     }
 
+    /**
+     * @return Credential|string|null
+     * @throws ClientException
+     */
     public function getSessionCredential()
     {
         if ($this->lastClearTime != null && $this->sessionCredential != null) {
-            $now = time();
+            $now         = time();
             $elapsedTime = $now - $this->lastClearTime;
             if ($elapsedTime <= ROLE_ARN_EXPIRE_TIME * 0.8) {
                 return $this->sessionCredential;
@@ -73,35 +102,36 @@ class RamRoleArnService
         }
 
         $this->sessionCredential = $credential;
-        $this->lastClearTime = time();
+        $this->lastClearTime     = time();
 
         return $credential;
     }
 
+    /**
+     * @return Credential|null
+     * @throws ClientException
+     */
     private function assumeRole()
     {
-        $signer = $this->clientProfile->getSigner();
-        /**
-         * @var RamRoleArnCredential $ramRoleArnCredential
-         */
+        $signer               = $this->clientProfile->getSigner();
         $ramRoleArnCredential = $this->clientProfile->getCredential();
 
-        $request = new AssumeRoleRequest($ramRoleArnCredential->getRoleArn(), $ramRoleArnCredential->getRoleSessionName());
+        $request =
+            new AssumeRoleRequest($ramRoleArnCredential->getRoleArn(), $ramRoleArnCredential->getRoleSessionName());
 
         $requestUrl = $request->composeUrl($signer, $ramRoleArnCredential, self::$serviceDomain);
 
         $httpResponse = HttpHelper::curl($requestUrl, $request->getMethod(), null, $request->getHeaders());
 
-        if (!$httpResponse->isSuccess())
-        {
+        if (!$httpResponse->isSuccess()) {
             return null;
         }
 
         $respObj = json_decode($httpResponse->getBody());
 
-        $sessionAccessKeyId = $respObj->Credentials->AccessKeyId;
+        $sessionAccessKeyId     = $respObj->Credentials->AccessKeyId;
         $sessionAccessKeySecret = $respObj->Credentials->AccessKeySecret;
-        $securityToken = $respObj->Credentials->SecurityToken;
+        $securityToken          = $respObj->Credentials->SecurityToken;
         return new Credential($sessionAccessKeyId, $sessionAccessKeySecret, $securityToken);
     }
 }

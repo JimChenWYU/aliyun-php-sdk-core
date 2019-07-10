@@ -25,7 +25,13 @@ class EndpointProvider
      * @var Endpoint[]
      */
     private static $endpoints;
-    
+
+    /**
+     * @param $regionId
+     * @param $product
+     *
+     * @return null
+     */
     public static function findProductDomain($regionId, $product)
     {
         if (null == $regionId || null == $product || null == self::$endpoints) {
@@ -38,12 +44,15 @@ class EndpointProvider
         }
         return null;
     }
-    
+
+    /**
+     * @param ProductDomain[] $productDomains
+     * @param string $product
+     *
+     * @return null
+     */
     private static function findProductDomainByProduct($productDomains, $product)
     {
-        /**
-         * @var ProductDomain[] $productDomains
-         */
         if (null == $productDomains) {
             return null;
         }
@@ -54,13 +63,18 @@ class EndpointProvider
         }
         return null;
     }
-    
-    
+
+    /**
+     * @return array
+     */
     public static function getEndpoints()
     {
         return self::$endpoints;
     }
-    
+
+    /**
+     * @param $endpoints
+     */
     public static function setEndpoints($endpoints)
     {
         self::$endpoints = $endpoints;

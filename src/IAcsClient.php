@@ -21,5 +21,10 @@ namespace JimChen\AliyunCore;
 
 interface IAcsClient
 {
+    /**
+     * @param AcsRequest $request
+     *
+     * @return mixed
+     */
     public function doAction($requst);
 }
