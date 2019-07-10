@@ -35,7 +35,15 @@ abstract class AcsRequest
 	
 	protected $locationServiceCode;
 	protected $locationEndpointType;
-	
+    /**
+     * @var array The original parameters of the request object.
+     */
+    protected $requestParameters = array();
+    /**
+     * @var string
+     */
+    protected $stringToBeSigned = '';
+
 	function  __construct($product, $version, $actionName, $locationServiceCode = null, $locationEndpointType = "openAPI")
 	{
 	    $this->headers["x-sdk-client"] = "php/2.0.0";
@@ -153,4 +161,41 @@ abstract class AcsRequest
 	{
 		return $this->locationEndpointType;
 	}
+
+    /**
+     * Magic method for get parameters.
+     *
+     * @param string $name
+     * @param mixed  $arguments
+     *
+     * @return $this
+     */
+    public function __call($name, $arguments)
+    {
+        if (\strpos($name, 'get', 0) !== false) {
+            $parameterName = $this->propertyNameByMethodName($name);
+            return isset($this->requestParameters[$parameterName])
+                ? $this->requestParameters[$parameterName]
+                : null;
+        }
+        return $this;
+    }
+
+    /**
+     * @param string $methodName
+     *
+     * @return string
+     */
+    protected function propertyNameByMethodName($methodName)
+    {
+        return \mb_strcut($methodName, 3);
+    }
+
+    /**
+     * @return string
+     */
+    public function stringToBeSigned()
+    {
+        return $this->stringToBeSigned;
+    }
 }

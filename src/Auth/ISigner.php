@@ -26,4 +26,6 @@ interface ISigner
     public function getSignatureVersion();
     
     public function signString($source, $accessSecret);
+
+    public function getSignatureType();
 }

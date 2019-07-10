@@ -31,6 +31,7 @@ use JimChen\AliyunCore\Regions\ProductDomain;
 define("AUTH_TYPE_RAM_AK", "RAM_AK");
 define("AUTH_TYPE_RAM_ROLE_ARN", "RAM_ROLE_ARN");
 define("AUTH_TYPE_ECS_RAM_ROLE", "ECS_RAM_ROLE");
+define('AUTH_TYPE_BEARER_TOKEN', 'BEARER_TOKEN');
 
 class DefaultProfile implements IClientProfile
 {
@@ -47,11 +48,12 @@ class DefaultProfile implements IClientProfile
 	private static $isigner;
 	private static $iCredential;
 	
-	private function  __construct($regionId, $credential, $authType = AUTH_TYPE_RAM_AK)
+	private function  __construct($regionId, $credential, $authType = AUTH_TYPE_RAM_AK, $isigner = null)
 	{
 	    self::$regionId = $regionId;
 	    self::$credential = $credential;
 	    self::$authType = $authType;
+	    self::$isigner = $isigner;
 	}
 	
 	public static function getProfile($regionId, $accessKeyId, $accessSecret, $securityToken = null)

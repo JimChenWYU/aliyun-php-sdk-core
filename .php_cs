@@ -2,7 +2,7 @@
 $header = <<<EOF
 This file is part of the /imchen/aliyun-php-sdk-core.
 
-(c) JimChen <18219111672@163.com>
+(c) JimChen <imjimchen@163.com>
 
 This source file is subject to the MIT license that is bundled.
 EOF;

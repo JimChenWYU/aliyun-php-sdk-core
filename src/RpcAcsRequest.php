@@ -19,6 +19,7 @@
  */
 namespace JimChen\AliyunCore;
 
+use JimChen\AliyunCore\Auth\BearerTokenCredential;
 use JimChen\AliyunCore\Auth\Credential;
 use JimChen\AliyunCore\Auth\ISigner;
 
@@ -26,18 +27,14 @@ abstract class RpcAcsRequest extends AcsRequest
 {
     private $dateTimeFormat = 'Y-m-d\TH:i:s\Z';
     private $domainParameters = array();
-
-    function  __construct($product, $version, $actionName, $locationServiceCode = null, $locationEndpointType = "openAPI")
-    {
-        parent::__construct($product, $version, $actionName, $locationServiceCode, $locationEndpointType);
-        $this->initialize();
-    }
-    
-    private function initialize()
-    {
-        $this->setMethod("GET");
-        $this->setAcceptFormat("JSON");
-    }
+    /**
+     * @var string
+     */
+    protected $method = 'GET';
+    /**
+     * @var string
+     */
+    protected $acceptFormat = 'JSON';
 
     private function prepareValue($value)
     {
@@ -67,12 +64,18 @@ abstract class RpcAcsRequest extends AcsRequest
         $apiParams["Format"] = $this->getAcceptFormat();
         $apiParams["SignatureMethod"] = $iSigner->getSignatureMethod();
         $apiParams["SignatureVersion"] = $iSigner->getSignatureVersion();
+        if ($iSigner->getSignatureType() != null) {
+            $apiParams['SignatureType'] = $iSigner->getSignatureType();
+        }
         $apiParams["SignatureNonce"] = md5(uniqid(mt_rand(), true));
         $apiParams["Timestamp"] = gmdate($this->dateTimeFormat);
         $apiParams["Action"] = $this->getActionName();
         $apiParams["Version"] = $this->getVersion();
         if ($credential->getSecurityToken() != null) {
             $apiParams["SecurityToken"] = $credential->getSecurityToken();
+        }
+        if ($credential instanceof BearerTokenCredential) {
+            $apiParams['BearerToken'] = $credential->getBearerToken();
         }
         $apiParams["Signature"] = $this->computeSignature($apiParams, $credential->getAccessSecret(), $iSigner);
         if (parent::getMethod() == "POST") {
@@ -110,8 +113,7 @@ abstract class RpcAcsRequest extends AcsRequest
     protected function percentEncode($str)
     {
         $res = urlencode($str);
-        $res = preg_replace('/\+/', '%20', $res);
-        $res = preg_replace('/\*/', '%2A', $res);
+        $res = str_replace(array('+', '*'), array('%20', '%2A'), $res);
         $res = preg_replace('/%7E/', '~', $res);
         return $res;
     }

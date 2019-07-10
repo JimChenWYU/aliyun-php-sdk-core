@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,27 +18,43 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 namespace JimChen\AliyunCore\Auth;
 
-class ShaHmac1Signer implements ISigner
+class BearTokenSigner implements ISigner
 {
+    /**
+     * @param $source
+     * @param $accessSecret
+     *
+     * @return null
+     */
     public function signString($source, $accessSecret)
     {
-        return    base64_encode(hash_hmac('sha1', $source, $accessSecret, true));
+        return null;
     }
-    
+
+    /**
+     * @return null
+     */
     public function getSignatureMethod()
     {
-        return "HMAC-SHA1";
+        return null;
     }
 
+    /**
+     * @return string
+     */
     public function getSignatureVersion()
     {
-        return "1.0";
+        return '1.0';
     }
 
+    /**
+     * @return string
+     */
     public function getSignatureType()
     {
-        return null;
+        return 'BEARERTOKEN';
     }
 }

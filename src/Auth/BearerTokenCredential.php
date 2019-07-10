@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,26 +18,62 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 namespace JimChen\AliyunCore\Auth;
 
-class ShaHmac1Signer implements ISigner
+class BearerTokenCredential extends AbstractCredential
 {
-    public function signString($source, $accessSecret)
+    /**
+     * @var string
+     */
+    private $bearerToken;
+
+    /**
+     * BearerTokenCredential constructor.
+     *
+     * @param $bearerToken
+     */
+    public function __construct($bearerToken)
     {
-        return    base64_encode(hash_hmac('sha1', $source, $accessSecret, true));
-    }
-    
-    public function getSignatureMethod()
-    {
-        return "HMAC-SHA1";
+        $this->bearerToken = $bearerToken;
     }
 
-    public function getSignatureVersion()
+    /**
+     * @return null
+     */
+    public function getAccessKeyId()
     {
-        return "1.0";
+        return null;
     }
 
-    public function getSignatureType()
+    /**
+     * @return null
+     */
+    public function getAccessSecret()
+    {
+        return null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBearerToken()
+    {
+        return $this->bearerToken;
+    }
+
+    /**
+     * @param $bearerToken
+     */
+    public function setBearerToken($bearerToken)
+    {
+        $this->bearerToken = $bearerToken;
+    }
+
+    /**
+     * @return null
+     */
+    public function getSecurityToken()
     {
         return null;
     }

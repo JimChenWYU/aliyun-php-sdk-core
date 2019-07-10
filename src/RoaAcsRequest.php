@@ -20,6 +20,8 @@
 
 namespace JimChen\AliyunCore;
 
+use JimChen\AliyunCore\Auth\AbstractCredential;
+use JimChen\AliyunCore\Auth\BearerTokenCredential;
 use JimChen\AliyunCore\Auth\Credential;
 use JimChen\AliyunCore\Auth\ISigner;
 
@@ -32,31 +34,24 @@ abstract class RoaAcsRequest extends AcsRequest
     private static $headerSeparator = "\n";
     private static $querySeprator = "&";
 
-    function __construct(
-        $product,
-        $version,
-        $actionName,
-        $locationServiceCode = null,
-        $locationEndpointType = "openAPI"
-    ) {
-        parent::__construct($product, $version, $actionName, $locationServiceCode, $locationEndpointType);
-        $this->setVersion($version);
-        $this->initialize();
-    }
-
-    private function initialize()
-    {
-        $this->setMethod("RAW");
-        $this->setAcceptFormat("JSON");
-    }
+    /**
+     * @var string
+     */
+    protected $method = 'RAW';
+    /**
+     * @var string
+     */
+    protected $acceptFormat = 'JSON';
 
     public function composeUrl($iSigner, $credential, $domain)
     {
+        $this->headers['x-acs-version'] = &$this->version;
+
         /**
          * @var ISigner $iSigner
          * @var Credential $credential
          */
-        $this->prepareHeader($iSigner);
+        $this->prepareHeader($iSigner, $credential);
 
         $signString = $this->getMethod() . self::$headerSeparator;
         if (isset($this->headers["Accept"])) {
@@ -82,6 +77,9 @@ abstract class RoaAcsRequest extends AcsRequest
         $uri = $this->replaceOccupiedParameters();
         $signString = $signString . $this->buildCanonicalHeaders();
         $queryString = $this->buildQueryString($uri);
+        if (substr($queryString, -1) === '?') {
+            $queryString = substr($queryString, 0, -1);
+        }
         $signString .= $queryString;
         $this->headers["Authorization"] = "acs " . $credential->getAccessKeyId() . ":"
             . $iSigner->signString($signString, $credential->getAccessSecret());
@@ -113,10 +111,11 @@ abstract class RoaAcsRequest extends AcsRequest
         return '?' . $queryString;
     }
 
-    private function prepareHeader($iSigner)
+    private function prepareHeader($iSigner, $credential)
     {
         /**
          * @var ISigner $iSigner
+         * @var AbstractCredential $credential
          */
         $this->headers["Date"] = gmdate($this->dateTimeFormat);
         if (null == $this->acceptFormat) {
@@ -125,13 +124,25 @@ abstract class RoaAcsRequest extends AcsRequest
         $this->headers["Accept"] = $this->formatToAccept($this->getAcceptFormat());
         $this->headers["x-acs-signature-method"] = $iSigner->getSignatureMethod();
         $this->headers["x-acs-signature-version"] = $iSigner->getSignatureVersion();
-        $this->headers["x-acs-region-id"] = $this->regionId;
-        $content = $this->getContent();
-        if ($content != null) {
-            $this->headers["Content-MD5"] = base64_encode(md5($content, true));
+        if ($iSigner->getSignatureType() != null) {
+            $this->headers['x-acs-signature-type'] = $iSigner->getSignatureType();
         }
-
-        $this->headers["Content-Type"] = "application/json;charset=utf-8";
+        $this->headers['x-acs-region-id'] = $this->regionId;
+        $content                          = $this->getDomainParameter();
+        if ($content != null) {
+            $this->headers['Content-MD5'] = base64_encode(md5(json_encode($content), true));
+        }
+        if ($this->acceptFormat === 'JSON') {
+            $this->headers['Content-Type'] = 'application/json;charset=utf-8';
+        } else {
+            $this->headers['Content-Type'] = 'application/octet-stream;charset=utf-8';
+        }
+        if ($credential->getSecurityToken() != null) {
+            $this->headers['x-acs-security-token'] = $credential->getSecurityToken();
+        }
+        if ($credential instanceof BearerTokenCredential) {
+            $this->headers['x-acs-bearer-token'] = $credential->getBearerToken();
+        }
     }
 
     private function replaceOccupiedParameters()
@@ -168,10 +179,10 @@ abstract class RoaAcsRequest extends AcsRequest
         $queIndex = strpos($uri, "?");
         $uriParts = array();
         if (null != $queIndex) {
-            array_push($uriParts, substr($uri, 0, $queIndex));
-            array_push($uriParts, substr($uri, $queIndex + 1));
+            $uriParts[] = substr($uri, 0, $queIndex);
+            $uriParts[] = substr($uri, $queIndex + 1);
         } else {
-            array_push($uriParts, $uri);
+            $uriParts[] = $uri;
         }
 
         return $uriParts;
